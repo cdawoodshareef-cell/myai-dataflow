@@ -1,0 +1,305 @@
+{
+  "pbtResults": {
+    "9.1 Write property tests P1–P5 in `tests/test_properties.py`": {
+      "status": "passed",
+      "lastRunTimestamp": 1794382585982
+    },
+    "9.2 Write property tests P6–P10 in `tests/test_properties.py`": {
+      "status": "passed",
+      "lastRunTimestamp": 1794382591544
+    },
+    "9.3 Write property tests P11–P14 in `tests/test_properties.py`": {
+      "status": "passed",
+      "lastRunTimestamp": 1794382597018
+    }
+  },
+  "executionHistory": {
+    "1. Environment setup and dependency verification": [
+      {
+        "executionId": "7a9c47b2-8805-4cee-9c52-42c7c0a481bd",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794379527345
+      }
+    ],
+    "2.1 Create the application directory structure": [
+      {
+        "executionId": "7a9c47b2-8805-4cee-9c52-42c7c0a481bd",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794379533447
+      },
+      {
+        "executionId": "7a9c47b2-8805-4cee-9c52-42c7c0a481bd",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794379634889
+      }
+    ],
+    "2. Project scaffold": [
+      {
+        "executionId": "7a9c47b2-8805-4cee-9c52-42c7c0a481bd",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794379635016
+      }
+    ],
+    "3.1 Write `sample_data.csv` with 15+ data rows meeting all sample requirements": [
+      {
+        "executionId": "853d1bb5-d490-4df5-ad8e-9d9435fb2d41",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794379705496
+      },
+      {
+        "executionId": "853d1bb5-d490-4df5-ad8e-9d9435fb2d41",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794379853963
+      }
+    ],
+    "3. Create bundled sample CSV": [
+      {
+        "executionId": "853d1bb5-d490-4df5-ad8e-9d9435fb2d41",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794379854072
+      }
+    ],
+    "4.1 Implement `read_csv(file_obj)` in `csv_reader.py`": [
+      {
+        "executionId": "7b93a4af-a1c0-47ca-bb9b-4c59df1145f2",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794380025482
+      },
+      {
+        "executionId": "7b93a4af-a1c0-47ca-bb9b-4c59df1145f2",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794380173792
+      }
+    ],
+    "4.2 Write unit tests for `csv_reader.py` in `tests/test_csv_reader.py`": [
+      {
+        "executionId": "7b93a4af-a1c0-47ca-bb9b-4c59df1145f2",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794380180118
+      },
+      {
+        "executionId": "7b93a4af-a1c0-47ca-bb9b-4c59df1145f2",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794380195327
+      }
+    ],
+    "4. Implement `csv_reader.py` and its unit tests": [
+      {
+        "executionId": "7b93a4af-a1c0-47ca-bb9b-4c59df1145f2",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794380195492
+      }
+    ],
+    "5.1 Define `FlaggedRow` and `ValidationResult` dataclasses in `validator.py`": [
+      {
+        "executionId": "b2dfcae7-7724-46a5-b488-594faec6f349",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794380236432
+      },
+      {
+        "executionId": "656a540a-728f-4dd9-bc3e-92b83a4fbdbf",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794380881253
+      },
+      {
+        "executionId": "656a540a-728f-4dd9-bc3e-92b83a4fbdbf",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381198680
+      }
+    ],
+    "5.2 Implement `validate_rows(column_names, data_rows)` in `validator.py`": [
+      {
+        "executionId": "656a540a-728f-4dd9-bc3e-92b83a4fbdbf",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381205280
+      },
+      {
+        "executionId": "656a540a-728f-4dd9-bc3e-92b83a4fbdbf",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381211928
+      }
+    ],
+    "5.3 Write unit tests for `validator.py` — core validation cases in `tests/test_validator.py`": [
+      {
+        "executionId": "656a540a-728f-4dd9-bc3e-92b83a4fbdbf",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381218520
+      },
+      {
+        "executionId": "656a540a-728f-4dd9-bc3e-92b83a4fbdbf",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381225166
+      }
+    ],
+    "5.4 Write unit test: **Three-Identical-Rows at positions 4, 5, 6** in `tests/test_validator.py`": [
+      {
+        "executionId": "656a540a-728f-4dd9-bc3e-92b83a4fbdbf",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381231615
+      },
+      {
+        "executionId": "656a540a-728f-4dd9-bc3e-92b83a4fbdbf",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381238416
+      }
+    ],
+    "5.5 Write unit test: **Duplicate with Missing Value** in `tests/test_validator.py`": [
+      {
+        "executionId": "656a540a-728f-4dd9-bc3e-92b83a4fbdbf",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381247705
+      },
+      {
+        "executionId": "656a540a-728f-4dd9-bc3e-92b83a4fbdbf",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381254591
+      }
+    ],
+    "5.6 Write unit test: short-row (fewer fields than header) in `tests/test_validator.py`": [
+      {
+        "executionId": "656a540a-728f-4dd9-bc3e-92b83a4fbdbf",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381261390
+      },
+      {
+        "executionId": "656a540a-728f-4dd9-bc3e-92b83a4fbdbf",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381268570
+      }
+    ],
+    "5. Implement `validator.py` and its unit tests": [
+      {
+        "executionId": "656a540a-728f-4dd9-bc3e-92b83a4fbdbf",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381268753
+      }
+    ],
+    "6.1 Implement `generate_clean_csv(column_names, clean_rows)` in `exporter.py`": [
+      {
+        "executionId": "73cf2043-1652-40ea-a3b4-15789606bb21",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381364673
+      },
+      {
+        "executionId": "e19137d8-b25e-4a2a-bf10-a697c7e825c8",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381854473
+      },
+      {
+        "executionId": "e19137d8-b25e-4a2a-bf10-a697c7e825c8",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381861055
+      }
+    ],
+    "6.2 Implement `generate_review_report(column_names, flagged_rows)` in `exporter.py`": [
+      {
+        "executionId": "6dde781b-eb5e-48f2-a41c-8633e520fb9d",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381596221
+      },
+      {
+        "executionId": "e19137d8-b25e-4a2a-bf10-a697c7e825c8",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381847909
+      }
+    ],
+    "6.3 Write unit tests for `exporter.py` in `tests/test_exporter.py`": [
+      {
+        "executionId": "e19137d8-b25e-4a2a-bf10-a697c7e825c8",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381867793
+      },
+      {
+        "executionId": "e19137d8-b25e-4a2a-bf10-a697c7e825c8",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381875094
+      }
+    ],
+    "6. Implement `exporter.py` and its unit tests": [
+      {
+        "executionId": "e19137d8-b25e-4a2a-bf10-a697c7e825c8",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794381875262
+      }
+    ],
+    "7.1 Implement the Streamlit UI layout and file upload in `app.py`": [
+      {
+        "executionId": "a621789f-8780-42df-9299-831292ce80de",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794382007081
+      },
+      {
+        "executionId": "a621789f-8780-42df-9299-831292ce80de",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794382183929
+      }
+    ],
+    "7.2 Implement the validation workflow trigger in `app.py`": [
+      {
+        "executionId": "a621789f-8780-42df-9299-831292ce80de",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794382190412
+      },
+      {
+        "executionId": "a621789f-8780-42df-9299-831292ce80de",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794382197842
+      }
+    ],
+    "7.3 Implement the results display and download buttons in `app.py`": [
+      {
+        "executionId": "a621789f-8780-42df-9299-831292ce80de",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794382204139
+      },
+      {
+        "executionId": "a621789f-8780-42df-9299-831292ce80de",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794382210560
+      }
+    ],
+    "7. Implement `app.py` Streamlit UI": [
+      {
+        "executionId": "a621789f-8780-42df-9299-831292ce80de",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794382210824
+      }
+    ],
+    "8. Checkpoint — run all unit tests": [
+      {
+        "executionId": "9f4b2ac3-bb08-4a29-9452-339f00803cae",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794382309930
+      },
+      {
+        "executionId": "9f4b2ac3-bb08-4a29-9452-339f00803cae",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794382328062
+      }
+    ],
+    "9.1 Write property tests P1–P5 in `tests/test_properties.py`": [
+      {
+        "executionId": "6c9aa288-fb28-42b4-b571-a407fd276db4",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794382407817
+      },
+      {
+        "executionId": "26a6d02e-b7fa-4def-8b4d-56addd91f279",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794382703117
+      }
+    ],
+    "9.2 Write property tests P6–P10 in `tests/test_properties.py`": [
+      {
+        "executionId": "26a6d02e-b7fa-4def-8b4d-56addd91f279",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794382709730
+      },
+      {
+        "executionId": "26a6d02e-b7fa-4def-8b4d-56addd91f279",
+        "chatSessionId": "sess_941b41af-e6f8-4010-bdeb-4bcabfd09bdc",
+        "timestamp": 1794382716227
+      }
+    ]
+  }
+}
