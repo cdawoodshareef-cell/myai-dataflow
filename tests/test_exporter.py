@@ -73,8 +73,12 @@ def test_review_report_header_has_extra_columns_appended():
     """Review report header ends with 'Original Row Number' and 'Flag Reason'."""
     fr = FlaggedRow(row_number=1, row_values=_valid_row(1), reason="Test reason")
     result = _parse_csv(generate_review_report(COLS, [fr]))
-    assert result[0] == COLS + ["Original Row Number", "Flag Reason"]
-
+    assert result[0] == COLS + [
+        "Original Row Number",
+        "Flag Reason",
+        "Excel Row Number",
+        "Duplicate of Excel Row",
+    ]
 
 def test_review_report_rows_in_ascending_row_number_order():
     """Rows are written in the order they are passed — caller sorts ascending."""
@@ -84,7 +88,8 @@ def test_review_report_rows_in_ascending_row_number_order():
         FlaggedRow(row_number=2, row_values=_valid_row(2), reason="reason 2"),
     ], key=lambda r: r.row_number)
     result = _parse_csv(generate_review_report(COLS, frs))
-    row_numbers = [int(r[-2]) for r in result[1:]]
+    row_number_index = result[0].index("Original Row Number")
+    row_numbers = [int(row[row_number_index]) for row in result[1:]]
     assert row_numbers == [1, 2, 3]
 
 
@@ -92,11 +97,15 @@ def test_review_report_empty_header_only():
     """When no flagged rows, review report contains only the header."""
     result = _parse_csv(generate_review_report(COLS, []))
     assert len(result) == 1
-    assert result[0] == COLS + ["Original Row Number", "Flag Reason"]
-
+    assert result[0] == COLS + [
+        "Original Row Number",
+        "Flag Reason",
+        "Excel Row Number",
+        "Duplicate of Excel Row",
+    ]
 
 def test_review_report_row_number_and_reason_correct():
-    """Row number and reason land in the last two fields."""
+    """Check the original row, flag reason, and Excel row fields."""
     fr = FlaggedRow(
         row_number=7,
         row_values=_valid_row(7),
@@ -104,32 +113,24 @@ def test_review_report_row_number_and_reason_correct():
     )
     result = _parse_csv(generate_review_report(COLS, [fr]))
     data_row = result[1]
-    assert data_row[-2] == "7"
-    assert data_row[-1] == "Missing value in column(s): 'Quantity'"
+
+    assert data_row[len(COLS):] == ["7", fr.reason, "8", ""]
 
 
 def test_review_report_short_row_padded_correctly():
-    """
-    A FlaggedRow with fewer row_values than column_names is padded so the
-    total field count is exactly len(COLS) + 2, with 'Original Row Number'
-    and 'Flag Reason' still in the last two positions.
-    """
-    short_values = ["INV-001", "2024-01-01", "Acme Corp"]  # 3 of 8
+    """Pad short rows so all four review fields align with their headers."""
+    short_values = ["INV-001", "2024-01-01", "Acme Corp"]
     fr = FlaggedRow(
         row_number=5,
         row_values=short_values,
-        reason="Missing value in column(s): 'Product Code', 'Product Description', 'Quantity', 'Unit Price', 'Total Amount'",
+        reason=(
+            "Missing value in column(s): 'Product Code', 'Product Description', "
+            "'Quantity', 'Unit Price', 'Total Amount'"
+        ),
     )
     result = _parse_csv(generate_review_report(COLS, [fr]))
     data_row = result[1]
 
-    assert len(data_row) == len(COLS) + 2, (
-        f"Expected {len(COLS) + 2} fields, got {len(data_row)}: {data_row}"
-    )
-    assert data_row[0] == "INV-001"
-    assert data_row[1] == "2024-01-01"
-    assert data_row[2] == "Acme Corp"
-    for i in range(3, 8):
-        assert data_row[i] == "", f"Field {i} should be empty padding, got '{data_row[i]}'"
-    assert data_row[-2] == "5"
-    assert "Product Code" in data_row[-1]
+    assert len(data_row) == len(COLS) + 4
+    assert data_row[:len(COLS)] == short_values + [""] * (len(COLS) - len(short_values))
+    assert data_row[len(COLS):] == ["5", fr.reason, "6", ""]

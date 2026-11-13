@@ -50,10 +50,23 @@ def generate_review_report(
     """
     buf = io.StringIO()
     writer = csv.writer(buf)
-    writer.writerow(column_names + ["Original Row Number", "Flag Reason"])
+    writer.writerow(column_names + [
+        "Original Row Number",
+        "Flag Reason",
+        "Excel Row Number",
+        "Duplicate of Excel Row",
+    ])
     for fr in flagged_rows:
         # Pad short rows; truncate over-wide rows to column width
         padded = list(fr.row_values) + [""] * max(0, len(column_names) - len(fr.row_values))
         padded = padded[: len(column_names)]
-        writer.writerow(padded + [fr.row_number, fr.reason])
+        duplicate_excel_row = (
+            fr.duplicate_of_row + 1 if fr.duplicate_of_row is not None else ""
+        )
+        writer.writerow(padded + [
+            fr.row_number,
+            fr.reason,
+            fr.row_number + 1,
+            duplicate_excel_row,
+        ])
     return buf.getvalue().encode("utf-8")

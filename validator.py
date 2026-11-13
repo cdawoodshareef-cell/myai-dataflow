@@ -20,6 +20,7 @@ class FlaggedRow:
     row_number: int
     row_values: List[str]
     reason: str
+    duplicate_of_row: int | None = None
 
 
 @dataclass
@@ -83,8 +84,9 @@ def validate_rows(
         ) if missing_cols else ""
 
         # --- Duplicate check ---
-        is_dup = row_key in seen
-        dup_reason = f"Exact duplicate of row {seen[row_key]}" if is_dup else ""
+        duplicate_of_row = seen.get(row_key)
+        is_dup = duplicate_of_row is not None
+        dup_reason = f"Exact duplicate of row {duplicate_of_row}" if is_dup else ""
 
         # --- Register first occurrence (always, regardless of validity) ---
         if not is_dup:
@@ -93,9 +95,13 @@ def validate_rows(
         # --- Flagging decision ---
         if is_dup and missing_cols:
             reason = f"{dup_reason}; {missing_reason}"
-            flagged_rows.append(FlaggedRow(row_number, list(row), reason))
+            flagged_rows.append(
+                FlaggedRow(row_number, list(row), reason, duplicate_of_row=duplicate_of_row)
+            )
         elif is_dup:
-            flagged_rows.append(FlaggedRow(row_number, list(row), dup_reason))
+            flagged_rows.append(
+                FlaggedRow(row_number, list(row), dup_reason, duplicate_of_row=duplicate_of_row)
+            )
         elif missing_cols:
             flagged_rows.append(FlaggedRow(row_number, list(row), missing_reason))
         else:

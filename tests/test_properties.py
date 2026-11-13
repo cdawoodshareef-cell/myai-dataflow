@@ -409,21 +409,23 @@ def test_p13_clean_output_integrity(rows):
     reason=_safe_text,
 )
 def test_p14_review_report_schema_consistency(n_values, row_number, reason):
-    """Every row in the review report has exactly len(column_names) + 2 fields,
-    regardless of how many values the FlaggedRow.row_values contains.
-    This includes short rows (fewer than len(COLS) values) and over-sized rows."""
+    """Keep review fields aligned for short and over-wide input rows."""
     row_values = ["x"] * n_values
     fr = FlaggedRow(row_number=row_number, row_values=row_values, reason=reason)
 
     report_bytes = exporter.generate_review_report(COLS, [fr])
     parsed = list(csv.reader(io.StringIO(report_bytes.decode("utf-8"))))
 
-    # Header row
-    assert parsed[0] == COLS + ["Original Row Number", "Flag Reason"]
-    # Data row
-    assert len(parsed[1]) == len(COLS) + 2, (
-        f"Expected {len(COLS) + 2} fields for n_values={n_values}, "
-        f"got {len(parsed[1])}: {parsed[1]}"
-    )
-    # Last two fields
-    assert parsed[1][-2] == str(row_number)
+    assert parsed[0] == COLS + [
+        "Original Row Number",
+        "Flag Reason",
+        "Excel Row Number",
+        "Duplicate of Excel Row",
+    ]
+    assert len(parsed[1]) == len(COLS) + 4
+    assert parsed[1][len(COLS):] == [
+        str(row_number),
+        reason,
+        str(row_number + 1),
+        "",
+    ]
