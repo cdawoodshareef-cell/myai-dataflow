@@ -211,3 +211,93 @@ if result is not None:
             mime="text/csv",
             use_container_width=True,
         )
+
+
+
+# ------------------------------------------------------------
+# Section 6 — JSON Sales Validation
+# ------------------------------------------------------------
+st.divider()
+st.subheader("6. JSON Sales Validation")
+
+st.caption(
+    "Upload a JSON file containing sales records. "
+    "Invalid records will be flagged automatically."
+)
+
+json_upload = st.file_uploader(
+    "Upload a supplier sales JSON file",
+    type=["json"],
+    key="json_sales_upload",
+)
+
+if json_upload is not None:
+    import csv
+    import json
+    from json_validator import validate_json_records
+
+    if json_upload.size > 50 * 1024 * 1024:
+        st.error("JSON file exceeds the 50 MB limit.")
+    else:
+        try:
+            json_data = json.load(json_upload)
+
+            if isinstance(json_data, dict):
+                json_data = [json_data]
+
+            if not isinstance(json_data, list):
+                st.error("Expected a JSON object or an array of objects.")
+            else:
+                json_records = [
+                    json.dumps(record)
+                    for record in json_data
+                ]
+
+                validation_results = validate_json_records(
+                    json_records
+                )
+
+                valid_count = sum(
+                    row["status"] == "VALID"
+                    for row in validation_results
+                )
+
+                invalid_count = (
+                    len(validation_results) - valid_count
+                )
+
+                j1, j2, j3 = st.columns(3)
+
+                j1.metric(
+                    "JSON records",
+                    len(validation_results),
+                )
+                j2.metric("Valid records", valid_count)
+                j3.metric("Invalid records", invalid_count)
+
+                st.subheader("JSON validation results")
+                st.dataframe(
+                    validation_results,
+                    use_container_width=True,
+                )
+
+                report_buffer = io.StringIO()
+                report_writer = csv.DictWriter(
+                    report_buffer,
+                    fieldnames=["row", "status"],
+                )
+                report_writer.writeheader()
+                report_writer.writerows(validation_results)
+
+                st.download_button(
+                    label="Download JSON validation report",
+                    data=report_buffer.getvalue().encode("utf-8"),
+                    file_name="json_validation_report.csv",
+                    mime="text/csv",
+                    use_container_width=True,
+                )
+
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            st.error(
+                "Invalid JSON file. Please upload valid UTF-8 JSON."
+            )
