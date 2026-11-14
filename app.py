@@ -9,6 +9,7 @@ import streamlit as st
 import csv_reader
 import validator as val
 import exporter
+from reconciliation_report import generate_reconciliation_summary
 
 # ---------------------------------------------------------------------------
 # Page config
@@ -32,6 +33,10 @@ if "result" not in st.session_state:
     st.session_state.result = None
 if "column_names" not in st.session_state:
     st.session_state.column_names = None
+if "data_rows" not in st.session_state:
+    st.session_state.data_rows = None
+if "reconciliation_summary" not in st.session_state:
+    st.session_state.reconciliation_summary = None
 
 
 def _run_validation(file_obj, source_label: str) -> None:
@@ -42,6 +47,8 @@ def _run_validation(file_obj, source_label: str) -> None:
         st.error(f"File error: {exc}")
         st.session_state.result = None
         st.session_state.column_names = None
+        st.session_state.data_rows = None
+        st.session_state.reconciliation_summary = None
         return
 
     try:
@@ -50,10 +57,18 @@ def _run_validation(file_obj, source_label: str) -> None:
         st.error(f"Validation error: {exc}")
         st.session_state.result = None
         st.session_state.column_names = None
+        st.session_state.data_rows = None
+        st.session_state.reconciliation_summary = None
         return
 
     st.session_state.result = result
     st.session_state.column_names = col_names
+    st.session_state.data_rows = data_rows
+    try:
+        st.session_state.reconciliation_summary = generate_reconciliation_summary(col_names, data_rows)
+    except ValueError as exc:
+        st.session_state.reconciliation_summary = None
+        st.info(f"Invoice reconciliation unavailable: {exc}")
     st.success(f"✅ Validation complete — {source_label}")
 
 
@@ -150,6 +165,49 @@ if result is not None:
             label="⬇️ Download review report",
             data=report_bytes,
             file_name="review_report.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+
+    # MYAI RECONCILIATION DASHBOARD
+    st.divider()
+    st.subheader("5. Supplier invoice reconciliation")
+    reconciliation = st.session_state.reconciliation_summary
+    if reconciliation is None:
+        st.info("Invoice reconciliation is unavailable for this CSV. Basic validation and downloads remain available.")
+    else:
+        r1, r2, r3, r4 = st.columns(4)
+        r1.metric("Total invoices", reconciliation["total_invoices"])
+        r2.metric("Valid invoices", reconciliation["valid_invoices"])
+        r3.metric("Invalid invoices", reconciliation["invalid_invoices"])
+        r4.metric("Duplicates excluded", reconciliation["duplicate_invoices"])
+        st.subheader("Financial reconciliation")
+        f1, f2, f3 = st.columns(3)
+        f1.metric("Reported amount", f"{reconciliation[chr(116)+chr(111)+chr(116)+chr(97)+chr(108)+chr(95)+chr(114)+chr(101)+chr(112)+chr(111)+chr(114)+chr(116)+chr(101)+chr(100)+chr(95)+chr(97)+chr(109)+chr(111)+chr(117)+chr(110)+chr(116)]:,.2f}")
+        f2.metric("Calculated amount", f"{reconciliation[chr(116)+chr(111)+chr(116)+chr(97)+chr(108)+chr(95)+chr(99)+chr(97)+chr(108)+chr(99)+chr(117)+chr(108)+chr(97)+chr(116)+chr(101)+chr(100)+chr(95)+chr(97)+chr(109)+chr(111)+chr(117)+chr(110)+chr(116)]:,.2f}")
+        f3.metric("Discrepancy", f"{reconciliation[chr(116)+chr(111)+chr(116)+chr(97)+chr(108)+chr(95)+chr(100)+chr(105)+chr(115)+chr(99)+chr(114)+chr(101)+chr(112)+chr(97)+chr(110)+chr(99)+chr(121)]:,.2f}")
+        st.caption("Duplicate rows are excluded from supplier totals. Invalid numeric rows do not contribute to financial totals.")
+        st.subheader("Supplier-wise reconciliation")
+        supplier_rows = []
+        for supplier, details in sorted(reconciliation["supplier_summary"].items()):
+            supplier_rows.append({
+                "Supplier": supplier,
+                "Invoices": details["invoice_count"],
+                "Valid": details["valid_invoices"],
+                "Invalid": details["invalid_invoices"],
+                "Reported amount": f"{details[chr(114)+chr(101)+chr(112)+chr(111)+chr(114)+chr(116)+chr(101)+chr(100)+chr(95)+chr(97)+chr(109)+chr(111)+chr(117)+chr(110)+chr(116)]:,.2f}",
+                "Calculated amount": f"{details[chr(99)+chr(97)+chr(108)+chr(99)+chr(117)+chr(108)+chr(97)+chr(116)+chr(101)+chr(100)+chr(95)+chr(97)+chr(109)+chr(111)+chr(117)+chr(110)+chr(116)]:,.2f}",
+                "Discrepancy": f"{details[chr(100)+chr(105)+chr(115)+chr(99)+chr(114)+chr(101)+chr(112)+chr(97)+chr(110)+chr(99)+chr(121)]:,.2f}",
+            })
+        if supplier_rows:
+            st.dataframe(supplier_rows, use_container_width=True)
+        else:
+            st.info("No supplier records to display.")
+        reconciliation_csv = exporter.generate_reconciliation_csv(reconciliation)
+        st.download_button(
+            label="Download reconciliation CSV",
+            data=reconciliation_csv,
+            file_name="supplier_reconciliation.csv",
             mime="text/csv",
             use_container_width=True,
         )

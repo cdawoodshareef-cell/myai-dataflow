@@ -70,3 +70,17 @@ def generate_review_report(
             duplicate_excel_row,
         ])
     return buf.getvalue().encode("utf-8")
+
+def generate_reconciliation_csv(summary):
+    """Generate a supplier-wise financial reconciliation CSV."""
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["Supplier Name", "Invoice Count", "Valid Invoices", "Invalid Invoices", "Reported Amount", "Calculated Amount", "Discrepancy"])
+    totals = {"invoice_count": 0, "valid_invoices": 0, "invalid_invoices": 0, "reported_amount": 0, "calculated_amount": 0, "discrepancy": 0}
+    for supplier, data in sorted(summary["supplier_summary"].items()):
+        writer.writerow([supplier, data["invoice_count"], data["valid_invoices"], data["invalid_invoices"], str(data["reported_amount"]), str(data["calculated_amount"]), str(data["discrepancy"])])
+        for key in totals:
+            totals[key] += data[key]
+    writer.writerow(["TOTAL (duplicates excluded)", totals["invoice_count"], totals["valid_invoices"], totals["invalid_invoices"], str(totals["reported_amount"]), str(totals["calculated_amount"]), str(totals["discrepancy"])])
+    writer.writerow(["Duplicate invoices excluded", summary["duplicate_invoices"], "", "", "", "", ""])
+    return buf.getvalue().encode("utf-8")
