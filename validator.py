@@ -2,6 +2,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
+from invoice_validator import validate_invoice_amount
 
 REQUIRED_COLUMNS: List[str] = [
     "Invoice Number",
@@ -91,6 +92,19 @@ def validate_rows(
         # --- Register first occurrence (always, regardless of validity) ---
         if not is_dup:
             seen[row_key] = row_number
+
+        invoice_fields = ("Quantity", "Unit Price", "Total Amount")
+        if not any(name in missing_cols for name in invoice_fields):
+            quantity, price, total = (row[normalised[name.lower()]] for name in invoice_fields)
+            if not validate_invoice_amount(quantity, price, total):
+                invoice_reason = "Invalid invoice amount"
+                if is_dup:
+                    dup_reason += "; " + invoice_reason
+                elif missing_cols:
+                    missing_reason += "; " + invoice_reason
+                else:
+                    missing_reason = invoice_reason
+                    missing_cols = ["Total Amount"]
 
         # --- Flagging decision ---
         if is_dup and missing_cols:

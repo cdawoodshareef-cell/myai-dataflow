@@ -42,10 +42,12 @@ _non_empty_cell = st.text(
     max_size=20,
 ).filter(lambda s: s.strip() != "")
 
-# A fully valid row (all 8 required columns filled, non-empty)
-_valid_row_strategy = st.fixed_dictionaries({c: _non_empty_cell for c in REQUIRED_COLUMNS}).map(
-    lambda d: [d[c] for c in REQUIRED_COLUMNS]
-)
+# A fully valid row with positive quantity, price, and matching total
+_valid_row_strategy = st.tuples(
+    st.fixed_dictionaries({c: _non_empty_cell for c in REQUIRED_COLUMNS[:5]}),
+    st.integers(min_value=1, max_value=10000),
+    st.integers(min_value=1, max_value=100000),
+).map(lambda values: [values[0][c] for c in REQUIRED_COLUMNS[:5]] + [str(values[1]), str(values[2] / 100) if False else format(__import__("decimal").Decimal(values[2]) / 100, ".2f"), format(__import__("decimal").Decimal(values[1]) * values[2] / 100, ".2f")])
 
 COLS = list(REQUIRED_COLUMNS)
 
