@@ -6,3 +6,5 @@ __pycache__/
 .streamlit/secrets.toml
 clean_output.csv
 review_report.csv
+.coverage
+
