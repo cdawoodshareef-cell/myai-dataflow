@@ -2,26 +2,40 @@
 
 ## Introduction
 
-MyAI DataFlow — CSV Error Detective is a browser-based Python web application for wholesalers that validates supplier sales CSV files. A user uploads a CSV file through a web browser, and the application inspects each row for missing required values and exact duplicate rows. Every flagged row is reported with its original row number and the reason it was flagged. The user can then download two output files: a clean CSV containing only the rows that passed all checks, and a review report CSV containing the flagged rows with their reasons. A synthetic sample CSV is bundled with the application for demonstration purposes. The application runs as a local web server on Windows (accessible via `localhost`) and can also be hosted at a public URL for demonstration events such as the Kiroween demo. It requires no paid APIs or external services for any of its functionality.
+MyAI DataFlow — CSV Error Detective is a browser-based Python web application designed to help wholesalers inspect, validate, reconcile, and review supplier invoice data.
+
+The Application provides CSV validation, invoice amount verification, duplicate detection, supplier-wise financial reconciliation, and JSON sales validation.
+
+For CSV files, users can upload supplier invoice data or load a bundled sample file. The Application checks required values, exact duplicates, and invoice calculations. It identifies invalid records, displays validation results, and provides downloadable clean CSV, review report, and reconciliation report files.
+
+The Review Report includes original row references, Excel row references, validation reasons, and duplicate references to help users locate and correct records in their original spreadsheets.
+
+The Application also provides a JSON validation workflow that checks sales records for valid JSON structure and acceptable sales values.
+
+The Application runs locally using Python and Streamlit and can also be deployed to a publicly accessible hosting environment. Its validation and reporting functionality does not require paid APIs or external validation services.
 
 ## Glossary
 
-- **Application**: The CSV Error Detective browser-based Python web application being described in this document.
-- **Web_Framework**: The open-source Python web framework (such as Streamlit, Gradio, or Flask) used to serve the Application's user interface in a web browser.
-- **Browser_Client**: The web browser through which the user interacts with the Application.
-- **CSV_File**: A comma-separated values file uploaded by the user for validation.
-- **Supplier_Sales_CSV**: The specific CSV file format used by wholesalers to record supplier sales data, containing defined required columns.
-- **Row**: A single data record (line) within a CSV file, identified by its 1-based row number (excluding the header row).
-- **Header_Row**: The first line of a CSV file that defines column names.
-- **Required_Column**: A column whose value must be present and non-empty for a row to be considered valid.
-- **Missing_Value**: A cell in a Required_Column that is empty, whitespace-only, or absent.
-- **Exact_Duplicate**: A row whose values in every column are identical to at least one other row already seen in the same file.
-- **Flagged_Row**: A row that has been identified as having a Missing_Value or being an Exact_Duplicate.
-- **Clean_CSV**: The output CSV file containing only rows that passed all validation checks.
-- **Review_Report**: The output CSV file containing all Flagged_Rows, including their original row numbers and flag reasons.
-- **Validator**: The component of the Application responsible for checking rows against all validation rules.
-- **Sample_CSV**: A synthetic CSV file bundled with the Application that demonstrates the expected file format and contains examples of valid and invalid rows.
-- **Reason**: A human-readable string describing why a row was flagged (e.g., "Missing value in column 'Invoice Number'", "Exact duplicate of row 3").
+- **Application**: MyAI DataFlow — CSV Error Detective.
+- **Web_Framework**: Streamlit, used to provide the browser-based interface.
+- **Browser_Client**: The web browser through which users interact with the Application.
+- **CSV_File**: A comma-separated values file uploaded for validation.
+- **Supplier_Invoice_CSV**: A CSV file containing supplier invoice records.
+- **Header_Row**: The first row of a CSV file containing column names.
+- **Required_Column**: A column that must be present in the CSV header.
+- **Missing_Value**: A required cell that is empty, contains only whitespace, or is absent from a row.
+- **Exact_Duplicate**: A row whose values across all columns match a previously processed row.
+- **Flagged_Row**: A record identified as having missing values, being a duplicate, or failing invoice amount validation.
+- **Clean_CSV**: The downloadable CSV containing rows that pass the validation rules.
+- **Review_Report**: The downloadable CSV containing flagged records and their review information.
+- **Excel_Row_Number**: The original data row number plus one, accounting for the header row.
+- **Duplicate_Reference**: The Excel row number of the first occurrence of a duplicate record.
+- **Invoice_Amount_Validation**: The comparison of the reported invoice total against the calculated quantity multiplied by unit price.
+- **Reconciliation_Report**: The supplier-wise financial summary generated from invoice records.
+- **JSON_Sales_Record**: A JSON object containing a sales field that the Application validates.
+- **Sample_CSV**: The synthetic supplier invoice CSV bundled with the Application.
+- **Validator**: The component responsible for checking CSV records.
+- **Reason**: A human-readable explanation of why a record was flagged.
 
 ---
 
@@ -29,127 +43,223 @@ MyAI DataFlow — CSV Error Detective is a browser-based Python web application 
 
 ### Requirement 1: CSV File Upload
 
-**User Story:** As a wholesaler, I want to upload a supplier sales CSV file, so that the Application can validate its contents.
+**User Story:** As a wholesaler, I want to upload a supplier invoice CSV file so that the Application can validate its contents.
 
 #### Acceptance Criteria
 
-1. THE Application SHALL provide a file selection interface that accepts files with a `.csv` extension.
-2. WHEN a user selects a file with an extension other than `.csv`, THE Application SHALL display an error message stating that only CSV files are accepted.
-3. WHEN a valid `.csv` file is selected, THE Application SHALL read the file using UTF-8 encoding.
-4. IF the selected CSV_File cannot be read due to a file system error, THEN THE Application SHALL display a descriptive error message and allow the user to select a different file.
-5. WHEN the CSV_File is read successfully, THE Application SHALL detect the Header_Row from the first line of the file.
-6. IF the CSV_File contains no Header_Row or no data rows, THEN THE Application SHALL display an error message stating that the file is empty or malformed and halt processing.
-
----
+1. THE Application SHALL provide a file selection interface that accepts CSV files.
+2. THE Application SHALL reject unsupported file formats with an appropriate error message.
+3. THE Application SHALL read CSV data using UTF-8 encoding.
+4. THE Application SHALL support binary file uploads and preserve original cell values.
+5. IF the file cannot be decoded or read, THEN THE Application SHALL display an appropriate error message.
+6. IF the CSV contains no header or no data rows, THEN THE Application SHALL display an appropriate error message and halt processing.
+7. THE Application SHALL support a maximum uploaded file size of 50 MB.
+8. THE Application SHALL allow the user to select another file after an upload or validation error.
 
 ### Requirement 2: Required Column Definition
 
-**User Story:** As a wholesaler, I want the Application to know which columns are required, so that it can correctly identify missing values in supplier sales data.
+**User Story:** As a wholesaler, I want the Application to recognize the required invoice columns so that incomplete records can be identified.
 
 #### Acceptance Criteria
 
-1. THE Application SHALL treat the following columns as Required_Columns for a Supplier_Sales_CSV: `Invoice Number`, `Invoice Date`, `Supplier Name`, `Product Code`, `Product Description`, `Quantity`, `Unit Price`, `Total Amount`.
-2. WHEN the uploaded CSV_File does not contain one or more Required_Columns in its Header_Row, THE Application SHALL display an error message listing the missing column names and halt processing.
-3. THE Application SHALL treat a cell value as a Missing_Value when the cell is empty, contains only whitespace characters, or is absent from the row.
+1. THE Application SHALL recognize the following required columns:
 
----
+   - `Invoice Number`
+   - `Invoice Date`
+   - `Supplier Name`
+   - `Product Code`
+   - `Product Description`
+   - `Quantity`
+   - `Unit Price`
+   - `Total Amount`
+
+2. THE Application SHALL identify required columns without depending on capitalization differences or surrounding whitespace in header names.
+3. IF one or more required columns are absent, THEN THE Application SHALL report the missing column names and halt CSV validation.
+4. THE Application SHALL treat empty, whitespace-only, and absent cell values as Missing_Values.
+5. THE Application SHALL support rows containing fewer fields than the header without causing an index error.
 
 ### Requirement 3: Missing Value Detection
 
-**User Story:** As a wholesaler, I want to know which rows have missing required values, so that I can correct incomplete data before processing it.
+**User Story:** As a wholesaler, I want to identify incomplete invoice records so that I can correct them.
 
 #### Acceptance Criteria
 
-1. WHEN the Validator processes a row, THE Validator SHALL check every Required_Column for a Missing_Value.
-2. WHEN a row contains one or more Missing_Values, THE Validator SHALL flag the row with a Reason that identifies each affected column name.
-3. WHEN a row contains Missing_Values in multiple Required_Columns, THE Validator SHALL report all affected column names in a single Reason string for that row.
-4. THE Validator SHALL record the original 1-based row number of every Flagged_Row, where row numbering starts at 1 for the first data row after the Header_Row.
-
----
+1. THE Validator SHALL inspect every Required_Column for Missing_Values.
+2. WHEN a record contains missing required values, THE Validator SHALL flag that record.
+3. THE Reason SHALL identify all affected column names.
+4. WHEN multiple required values are missing, THE Application SHALL report all affected columns in one reason.
+5. THE Validator SHALL record the original 1-based data row number, excluding the header row.
 
 ### Requirement 4: Exact Duplicate Detection
 
-**User Story:** As a wholesaler, I want to identify exact duplicate rows, so that I can remove redundant entries before importing data into my system.
+**User Story:** As a wholesaler, I want to identify duplicate invoice records so that redundant records can be reviewed.
 
 #### Acceptance Criteria
 
-1. WHEN the Validator processes a row, THE Validator SHALL compare the row's values across all columns against all previously processed rows in the same CSV_File.
-2. WHEN a row is identical in all column values to a previously processed row and the current row is not the first occurrence, THE Validator SHALL flag the current row as an Exact_Duplicate.
-3. WHEN flagging a row as an Exact_Duplicate, THE Validator SHALL include in the Reason the 1-based row number of the first occurrence of the duplicate, where row numbering starts at 1 for the first data row after the Header_Row (the Header_Row itself is not counted).
-4. WHEN the first occurrence of a set of identical rows contains no Missing_Values, THE Validator SHALL retain that first occurrence in the Clean_CSV and flag only subsequent occurrences as Exact_Duplicates.
-5. WHEN the first occurrence of a set of identical rows contains one or more Missing_Values, THE Validator SHALL flag that first occurrence for its Missing_Values only and SHALL NOT flag it as an Exact_Duplicate.
-6. WHEN a subsequent duplicate row also contains one or more Missing_Values, THE Validator SHALL flag that row with both the Exact_Duplicate reason and the Missing_Value reason in a single combined Reason string.
-7. THE Validator SHALL never include a row flagged as an Exact_Duplicate in the Clean_CSV, regardless of whether the row also has Missing_Values.
+1. THE Validator SHALL compare each row across all columns against previously processed rows.
+2. THE Validator SHALL identify the first occurrence of an exact duplicate.
+3. THE Validator SHALL flag subsequent identical records.
+4. THE duplicate reason SHALL reference the actual 1-based data row number of the first occurrence.
+5. WHEN the first occurrence is valid, THE Application SHALL retain it in the clean output.
+6. WHEN the first occurrence has missing values, THE Application SHALL flag it for its missing values.
+7. WHEN a subsequent duplicate also contains missing values, THE Application SHALL include both duplicate and missing-value reasons.
+8. THE Application SHALL retain the first-occurrence reference when three or more identical records exist.
+9. THE Application SHALL exclude duplicate records from the Clean_CSV.
+10. THE Application SHALL identify duplicate records separately for financial reconciliation.
+
+### Requirement 5: Invoice Amount Validation
+
+**User Story:** As a wholesaler, I want the Application to verify invoice calculations so that incorrect invoice totals can be identified.
+
+#### Acceptance Criteria
+
+1. THE Application SHALL calculate the expected invoice total using:
+
+   `Quantity × Unit Price`
+
+2. THE Application SHALL use decimal arithmetic for invoice calculations.
+3. THE Application SHALL round calculated totals to two decimal places using half-up rounding.
+4. THE Application SHALL flag an invoice when its reported total does not match the calculated total.
+5. THE Application SHALL reject non-numeric, non-finite, zero, or negative quantities and unit prices.
+6. THE Application SHALL reject missing or invalid invoice amount inputs.
+7. THE Application SHALL identify invalid invoice amounts using an appropriate validation reason.
+8. THE Application SHALL combine invoice validation reasons with other applicable reasons for the same record.
+9. THE Application SHALL preserve original invoice values in the review report.
+
+### Requirement 6: Flagged Row Reporting
+
+**User Story:** As a wholesaler, I want a clear summary of invalid records so that I can understand what requires correction.
+
+#### Acceptance Criteria
+
+1. THE Application SHALL display the total number of processed records.
+2. THE Application SHALL display the number of clean records.
+3. THE Application SHALL display the number of flagged records.
+4. THE Application SHALL display flagged records with their original values and validation reasons.
+5. THE Application SHALL present flagged records in ascending original row order.
+6. THE Application SHALL support multiple validation reasons for a single record.
+7. THE Application SHALL maintain the count invariant:
+
+   `Clean Count + Flagged Count = Total Count`
+
+### Requirement 7: Clean CSV Export
+
+**User Story:** As a wholesaler, I want to download validated invoice records without flagged entries.
+
+#### Acceptance Criteria
+
+1. THE Application SHALL provide a downloadable Clean_CSV after validation.
+2. THE Clean_CSV SHALL retain the original header and column order.
+3. THE Clean_CSV SHALL contain only records that passed all applicable validation checks.
+4. THE Clean_CSV SHALL preserve original cell values without modification.
+5. THE Clean_CSV SHALL be UTF-8 encoded.
+6. IF all records are flagged, THEN THE Application SHALL produce a header-only Clean_CSV.
+7. THE Application SHALL provide a notice when no clean records are available.
+
+### Requirement 8: Review Report Export
+
+**User Story:** As a wholesaler, I want a detailed review report so that I can locate and correct invalid records in my original spreadsheet.
+
+#### Acceptance Criteria
+
+1. THE Application SHALL provide a downloadable Review_Report.
+2. THE Review_Report SHALL retain all original CSV columns.
+3. THE Review_Report SHALL append these four columns:
+
+   - `Original Row Number`
+   - `Flag Reason`
+   - `Excel Row Number`
+   - `Duplicate of Excel Row`
+
+4. THE Original Row Number SHALL represent the 1-based data row number, excluding the header.
+5. THE Excel Row Number SHALL equal the Original Row Number plus one.
+6. THE Duplicate of Excel Row SHALL identify the Excel row number of the first occurrence when a record is a duplicate.
+7. THE duplicate reference SHALL remain empty for records that are not duplicates.
+8. THE Review_Report SHALL contain one record per flagged row.
+9. THE Review_Report SHALL preserve original record values.
+10. THE Review_Report SHALL list flagged records in ascending row order.
+11. THE Review_Report SHALL be UTF-8 encoded.
+12. IF no records are flagged, THEN THE Application SHALL produce a header-only report and display an appropriate notice.
+
+### Requirement 9: Supplier-Wise Financial Reconciliation
+
+**User Story:** As a wholesaler, I want financial totals summarized by supplier so that I can review invoice amounts and identify discrepancies.
+
+#### Acceptance Criteria
+
+1. THE Application SHALL generate a supplier-wise reconciliation summary from the uploaded invoice data.
+2. THE Application SHALL calculate reported and calculated invoice amounts.
+3. THE Application SHALL identify discrepancies between reported and calculated amounts.
+4. THE Application SHALL display relevant invoice counts and financial totals.
+5. THE Application SHALL identify invalid invoice records in the reconciliation results.
+6. THE Application SHALL exclude duplicate records from financial totals to avoid double counting.
+7. THE Application SHALL retain invalid invoice records in the reconciliation results rather than silently removing them.
+8. THE Application SHALL display supplier-wise reconciliation results in the dashboard.
+9. THE Application SHALL provide a downloadable reconciliation CSV.
+10. THE reconciliation CSV SHALL include a total summary and information about excluded duplicate records.
+11. THE Application SHALL handle cases where reconciliation cannot be performed because required data or headers are unavailable.
+
+### Requirement 10: JSON Sales Validation
+
+**User Story:** As a wholesaler, I want to validate JSON sales records so that incorrect sales data can be identified.
+
+#### Acceptance Criteria
+
+1. THE Application SHALL provide a separate JSON file upload interface.
+2. THE Application SHALL accept JSON objects and arrays of JSON records.
+3. THE Application SHALL require each sales record to contain a `sales` field.
+4. THE `sales` field SHALL contain a numeric value.
+5. THE Application SHALL accept zero and non-negative sales values.
+6. THE Application SHALL reject negative sales values.
+7. THE Application SHALL reject strings, null values, Boolean values, and other non-numeric sales values.
+8. THE Application SHALL report malformed JSON and unsupported top-level structures.
+9. THE Application SHALL display a validation result for each record, including its row number and status.
+10. THE Application SHALL display valid and invalid record counts.
+11. THE Application SHALL provide a downloadable CSV validation report containing record numbers and validation statuses.
+12. THE Application SHALL reject non-finite numeric sales values, including NaN, Infinity, and negative Infinity.
+13. THE JSON workflow SHALL remain separate from the supplier invoice CSV workflow.
+
+### Requirement 11: Sample CSV
+
+**User Story:** As a wholesaler, I want a bundled sample file so that I can explore the Application without uploading real business data.
+
+#### Acceptance Criteria
+
+1. THE Application SHALL include `sample_data.csv` in the project distribution.
+2. THE Sample_CSV SHALL use the eight required invoice columns.
+3. THE Sample_CSV SHALL contain at least 15 data rows.
+4. THE Sample_CSV SHALL contain at least three rows with missing values across different required columns.
+5. THE Sample_CSV SHALL contain at least two exact duplicate records.
+6. THE Sample_CSV SHALL contain at least eight fully valid, non-duplicate records.
+7. THE Application SHALL provide an option to load the bundled sample into the normal validation workflow.
+8. THE Application SHALL locate the sample file relative to the application script rather than relying on the current working directory.
+
+### Requirement 12: Deployment Compatibility
+
+**User Story:** As a wholesaler and application demonstrator, I want the Application to run locally and through a public hosting environment.
+
+#### Acceptance Criteria
+
+1. THE Application SHALL run on a supported Windows environment without requiring administrator privileges.
+2. THE Application SHALL provide a local browser interface using Streamlit.
+3. THE Application SHALL use port 8501 by default when started locally.
+4. THE Application SHALL perform validation and report generation on the application server.
+5. THE Application SHALL NOT require paid APIs or external validation services.
+6. THE Application SHALL include a `requirements.txt` file with pinned third-party dependencies.
+7. THE Application SHALL include the bundled sample CSV in the repository.
+8. THE Application SHALL use paths that work independently of the terminal's current working directory.
+9. WHERE deployed to a supported public hosting environment, THE Application SHALL provide its documented functionality without source-code changes.
+10. THE Application SHALL provide appropriate error handling for missing files, malformed uploads, and unsupported input data.
 
 ---
 
-### Requirement 5: Flagged Row Reporting
+## Implementation Scope Notes
 
-**User Story:** As a wholesaler, I want to see a clear summary of all flagged rows with reasons, so that I understand what data needs to be corrected.
+The following distinctions are important when maintaining this specification:
 
-#### Acceptance Criteria
-
-1. WHEN validation is complete, THE Application SHALL display the total count of rows processed, the count of Flagged_Rows, and the count of clean rows.
-2. THE Application SHALL present each Flagged_Row in a results view showing the original row number, the full row values, and the Reason for flagging.
-3. WHEN a row is flagged for both a Missing_Value and being an Exact_Duplicate, THE Application SHALL report both reasons for that row.
-4. WHILE displaying results, THE Application SHALL list Flagged_Rows in ascending order of their original row numbers.
-
----
-
-### Requirement 6: Clean CSV Export
-
-**User Story:** As a wholesaler, I want to download a clean CSV file, so that I can use the validated data directly in my system without manual filtering.
-
-#### Acceptance Criteria
-
-1. WHEN validation is complete, THE Application SHALL make a Clean_CSV available for download.
-2. THE Clean_CSV SHALL contain the Header_Row from the original CSV_File as its first line.
-3. THE Clean_CSV SHALL contain only the rows from the original CSV_File that were not flagged by the Validator.
-4. THE Clean_CSV SHALL preserve the original column order and cell values of all included rows without modification.
-5. WHEN the user initiates the Clean_CSV download, THE Application SHALL deliver the file to the Browser_Client as a downloadable file using the browser's native download mechanism.
-6. IF all rows in the uploaded CSV_File are flagged, THEN THE Application SHALL write a Clean_CSV that contains only the Header_Row and display a notice that no clean rows were found.
-
----
-
-### Requirement 7: Review Report Export
-
-**User Story:** As a wholesaler, I want to download a review report of all flagged rows, so that I have a structured file I can share with my team for correction.
-
-#### Acceptance Criteria
-
-1. WHEN validation is complete, THE Application SHALL make a Review_Report available for download.
-2. THE Review_Report SHALL be a CSV file containing the Header_Row from the original CSV_File plus two additional columns: `Original Row Number` and `Flag Reason`.
-3. THE Review_Report SHALL contain one row per Flagged_Row, populated with the original cell values, the original row number in the `Original Row Number` column (using 1-based numbering where the first data row is row 1, excluding the Header_Row), and the Reason.
-4. THE Review_Report SHALL list rows in ascending order of original row numbers.
-5. WHEN the user initiates the Review_Report download, THE Application SHALL deliver the file to the Browser_Client as a downloadable file using the browser's native download mechanism.
-6. IF no rows are flagged, THEN THE Application SHALL write a Review_Report containing only the header line and display a notice that no flagged rows were found.
-
----
-
-### Requirement 8: Sample CSV
-
-**User Story:** As a wholesaler, I want a sample CSV file bundled with the Application, so that I can explore the Application's features without needing a real data file.
-
-#### Acceptance Criteria
-
-1. THE Application SHALL include a Sample_CSV file in its distribution that conforms to the Supplier_Sales_CSV column structure defined in Requirement 2.
-2. THE Sample_CSV SHALL contain at least 15 data rows.
-3. THE Sample_CSV SHALL include at least 3 rows with one or more Missing_Values across different Required_Columns.
-4. THE Sample_CSV SHALL include at least 2 rows that are Exact_Duplicates of earlier rows in the file.
-5. THE Sample_CSV SHALL include at least 8 rows that are fully valid and will appear in the Clean_CSV output.
-6. WHEN the user selects the option to load the Sample_CSV, THE Application SHALL load it into the validation workflow as if the user had uploaded it manually.
-
----
-
-### Requirement 9: Deployment Compatibility
-
-**User Story:** As a wholesaler running Windows, and as a demo presenter at the Kiroween event, I want the Application to run locally on Windows and optionally be accessible at a public URL, without paid APIs or cloud services, so that I can use it in my local environment and demonstrate it remotely at no additional cost.
-
-#### Acceptance Criteria
-
-1. THE Application SHALL run on Windows 10 and Windows 11 without requiring administrator privileges.
-2. WHEN started on a local Windows machine, THE Application SHALL start a local web server and serve the user interface at `http://localhost` on a configurable port number, defaulting to port 8501.
-3. THE Application SHALL perform all validation and file generation on the server side and SHALL NOT require any network connection or external API calls to complete validation or produce output files.
-4. THE Application SHALL rely only on Python standard library modules and freely available open-source third-party packages installable via `pip`.
-5. THE Application SHALL include a `requirements.txt` file listing all third-party dependencies with pinned version numbers.
-6. WHERE the Application is deployed to a publicly accessible hosting environment, THE Application SHALL serve the same user interface and all functionality at the hosted URL without modification to the application source code.
+- The currency validation module exists separately but is not currently integrated into the main application workflow.
+- JSON validation currently validates the presence and value of the `sales` field; it is not a general-purpose JSON schema validator.
+- The Application currently uses a 50 MB upload limit.
+- The review report currently contains four additional columns.
+- The current application has separate CSV validation, reconciliation, and JSON validation workflows.
+- Requirements describe implemented application behavior; future enhancements must be documented separately rather than represented as completed functionality.

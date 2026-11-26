@@ -24,11 +24,12 @@ def generate_reconciliation_summary(column_names, data_rows):
             summary["duplicate_invoices"] += 1
             continue
         seen.add(key)
-        supplier = row[normalized["supplier name"]].strip() or "Unknown supplier" if normalized["supplier name"] < len(row) else "Unknown supplier"
+        supplier_value = str(row[normalized["supplier name"]]).strip() if normalized["supplier name"] < len(row) else ""
+        supplier = supplier_value or "Unknown supplier"
         report = summary["supplier_summary"].setdefault(supplier, {"invoice_count": 0, "valid_invoices": 0, "invalid_invoices": 0, "reported_amount": Decimal("0.00"), "calculated_amount": Decimal("0.00"), "discrepancy": Decimal("0.00")})
         report["invoice_count"] += 1
         try:
-            if not str(row[normalized["invoice number"]]).strip() or not supplier.strip():
+            if not str(row[normalized["invoice number"]]).strip() or not supplier_value:
                 raise InvalidOperation
             qty = Decimal(str(row[normalized["quantity"]]))
             price = Decimal(str(row[normalized["unit price"]]))

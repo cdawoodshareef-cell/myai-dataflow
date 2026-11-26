@@ -1,5 +1,6 @@
 
 import json
+import math
 
 
 def validate_sales(raw_json):
@@ -20,6 +21,9 @@ def validate_sales(raw_json):
 
     if type(sales) not in (int, float):
         return "INVALID: sales must be a number"
+
+    if isinstance(sales, float) and not math.isfinite(sales):
+        return "INVALID: sales must be finite"
 
     if sales < 0:
         return "INVALID: negative sales"

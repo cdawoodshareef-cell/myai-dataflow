@@ -57,3 +57,19 @@ def test_missing_invoice_number():
     result = generate_reconciliation_summary(COLS, [row("", "Apex", "5", "100", "500")])
     assert result["invalid_invoices"] == 1
     assert result["valid_invoices"] == 0
+
+def test_blank_supplier_is_invalid_and_uses_fallback_label():
+    result = generate_reconciliation_summary(COLS, [row("1", "", "2", "100", "200")])
+    assert result["invalid_invoices"] == 1
+    assert result["valid_invoices"] == 0
+    supplier = result["supplier_summary"]["Unknown supplier"]
+    assert supplier["invalid_invoices"] == 1
+    assert supplier["valid_invoices"] == 0
+
+def test_whitespace_supplier_is_invalid_and_uses_fallback_label():
+    result = generate_reconciliation_summary(COLS, [row("1", "   ", "2", "100", "200")])
+    assert result["invalid_invoices"] == 1
+    assert result["valid_invoices"] == 0
+    supplier = result["supplier_summary"]["Unknown supplier"]
+    assert supplier["invalid_invoices"] == 1
+    assert supplier["valid_invoices"] == 0
